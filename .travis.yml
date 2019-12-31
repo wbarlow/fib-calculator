@@ -1,0 +1,36 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t wbarlow/fib-calculator-client -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true wbarlow/fib-calculator-client -f ./client/Dockerfile.dev ./client npm test
+
+after_success:
+  - docker build -t wbarlow/fib-calculator-client ./client
+  - docker build -t wbarlow/fib-calculator-nginx ./nginx
+  - docker build -t wbarlow/fib-calculator-server ./server
+  - docker build -t wbarlow/fib-calculator-worker ./worker
+  # Docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # copy images to docker-hub
+  - docker push wbarlow/fib-calculator-client
+  - docker push wbarlow/fib-calculator-nginx
+  - docker push wbarlow/fib-calculator-server
+  - docker push wbarlow/fib-calculator-worker
+
+# deploy:
+#  provider: elasticbeanstalk
+#  region: "us-east-1"
+#  app: "docker-react"
+#  env: "DockerReact-env"
+#  bucket_name: "elasticbeanstalk-us-east-1-348228962822"
+#  bucket_path: "docker-react"
+#  on:
+#    branch: master
+#  access_key_id: $AWS_ACCESS_KEY
+#  secret_access_key: $AWS_SECRET_KEY
+
