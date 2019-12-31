@@ -7,7 +7,7 @@ before_install:
   - docker build -t wbarlow/fib-calculator-client -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run -e CI=true wbarlow/fib-calculator-client -f ./client/Dockerfile.dev ./client npm test
+  - docker run -e CI=true wbarlow/fib-calculator-client ./client npm test
 
 after_success:
   - docker build -t wbarlow/fib-calculator-client ./client
