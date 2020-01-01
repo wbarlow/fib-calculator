@@ -22,15 +22,16 @@ after_success:
   - docker push wbarlow/fib-calculator-server
   - docker push wbarlow/fib-calculator-worker
 
-# deploy:
-#  provider: elasticbeanstalk
-#  region: "us-east-1"
-#  app: "docker-react"
-#  env: "DockerReact-env"
-#  bucket_name: "elasticbeanstalk-us-east-1-348228962822"
-#  bucket_path: "docker-react"
-#  on:
-#    branch: master
-#  access_key_id: $AWS_ACCESS_KEY
-#  secret_access_key: $AWS_SECRET_KEY
+deploy:
+  edge: true
+  provider: elasticbeanstalk
+  region: "us-east-1"
+  app: "fib-calculator"
+  env: "FibCalculator-env"
+  bucket_name: "elasticbeanstalk-us-east-1-348228962822"
+  bucket_path: "fib-calculator"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
 
