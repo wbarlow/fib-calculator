@@ -24,14 +24,14 @@ class Fib extends Component {
         
         // Remove duplicates we get back from the server
         let seenIdx = seenIndices.data.slice(0);
-        seenIdx.sort(function(a, b) {console.log(a); return a.number - b.number});
+        seenIdx.sort(function(a, b) {return a.number - b.number});
         let newArray = [];
         let len = seenIdx.length;
         for (let i = 0; i < len; i++) {
             if (i === 0) {
                 newArray.push(seenIdx[i]);
             } else {
-                if (seenIdx[i-1].number != seenIdx[i].number) {
+                if (seenIdx[i-1].number !== seenIdx[i].number) {
                     newArray.push(seenIdx[i])
                 }
             }
