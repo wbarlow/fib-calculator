@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM  from 'react-dom';
 import axios from 'axios';
 
 class Fib extends Component {
@@ -20,21 +21,48 @@ class Fib extends Component {
 
     async fetchIndices() {
         const seenIndices = await axios.get('/api/values/all');
+        
+        // Remove duplicates we get back from the server
+        let seenIdx = seenIndices.data.slice(0);
+        seenIdx.sort(function(a, b) {console.log(a); return a.number - b.number});
+        let newArray = [];
+        let len = seenIdx.length;
+        for (let i = 0; i < len; i++) {
+            if (i === 0) {
+                newArray.push(seenIdx[i]);
+            } else {
+                if (seenIdx[i-1].number != seenIdx[i].number) {
+                    newArray.push(seenIdx[i])
+                }
+            }
+        }
+        
         this.setState({
-            seenIndices: seenIndices.data
+            seenIndices: newArray
         });
     }
 
     handleSubmit = async (event) => {
         event.preventDefault();
+
+        const calcIndex = this.state.index;
         await axios.post('/api/values', {
             index: this.state.index
         });
+
         this.setState({index: ''});
+
+        // TBD: This should be done using react state
+        const newIndices = <h4>Calculating {calcIndex}...Refresh page to see results</h4>;
+        ReactDOM.render(newIndices, document.getElementById('fibcalc-indices'));
     };
 
     renderSeenIndices() {
-        return this.state.seenIndices.map(({ number }) => number).join(', ');
+        return (
+            <div id="fibcalc-indices">
+                <h4>{this.state.seenIndices.map(({ number }) => number).join(', ')}</h4>
+            </div>
+        );
     }
 
     renderValues() {
@@ -69,6 +97,9 @@ class Fib extends Component {
             </div>
         )
     }
+
+
+
 }
 
 export default Fib;
