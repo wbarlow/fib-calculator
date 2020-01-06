@@ -9,31 +9,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Postgres client setup
-const { Pool } = require('pg');
-const pgClient = new Pool({
-    user: keys.pgUser,
-    host: keys.pgHost,
-    database: keys.pgDatabase,
-    password: keys.pgPassword,
-    port: keys.pgPort
-});
-pgClient.on('error', () => console.log('Lost PG Connection!'));
+let rh = require('./modules/ValueRequestHandler');
+let ValueRequestHandler = rh.ValueRequestHandler;
+requestHandler = new ValueRequestHandler();
 
-pgClient.query('CREATE TABLE IF NOT EXISTS values (number INT)').catch((err) =>
-    console.log(err));
-
-// Redis client setup
-const redis = require('redis');
-const redisClient = redis.createClient({
-    host: keys.redisHost,
-    port: keys.redisPort,
-    retry_strategy: () => 1000
-});
-
-const redisPublisher = redisClient.duplicate();  
-
-// Express route handlers
 app.get('/', (req, res) => {
     console.log("default response");
     res.send('Hi');
@@ -46,16 +25,21 @@ app.get('/api', (req, res) => {
 
 app.get('/api/values/all', async (req, res) => {
     console.log("getting all values");
-    const values = await pgClient.query('SELECT * from values');
-    res.send(values.rows);
+    let result = await requestHandler.getAllValues();
+    console.log(result.rows.length);
+    console.log(Array.isArray(result.rows));
+    res.send(result.rows);
 });
 
 app.get('/api/values/current', async (req, res) => {
-    console.log("getting current value")
-    redisClient.hgetall('values', (err, values) => {
-        res.send(values);
-    });
+    let recent = await requestHandler.getRecentValues();
+    res.send(recent);
 });
+
+//app.get('/api/value/:number', async (req, res) => {
+
+//});
+
 
 app.post('/api/values', async (req, res) => {
     console.log("got a value for the client" + res);
@@ -66,9 +50,7 @@ app.post('/api/values', async (req, res) => {
         return res.status(422).send('Index too high');
     }
 
-    redisClient.hset('values', index, 'Nothing yet!');
-    redisPublisher.publish('insert', index);
-    pgClient.query('INSERT INTO values(number) VALUES($1)', [index]);
+    requestHandler.postValue(index);
 
     res.send({ working: true });
 });
