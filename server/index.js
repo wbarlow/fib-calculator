@@ -26,8 +26,6 @@ app.get('/api', (req, res) => {
 app.get('/api/values/all', async (req, res) => {
     console.log("getting all values");
     let result = await requestHandler.getAllValues();
-    console.log(result.rows.length);
-    console.log(Array.isArray(result.rows));
     res.send(result.rows);
 });
 
@@ -36,9 +34,10 @@ app.get('/api/values/current', async (req, res) => {
     res.send(recent);
 });
 
-//app.get('/api/value/:number', async (req, res) => {
-
-//});
+app.get('/api/values/:number', async (req, res) => {
+    let result = await requestHandler.getCachedValue(req.params.number);
+    res.send(result);
+});
 
 
 app.post('/api/values', async (req, res) => {

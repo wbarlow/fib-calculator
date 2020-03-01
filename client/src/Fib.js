@@ -52,15 +52,24 @@ class Fib extends Component {
         event.preventDefault();
 
         const calcIndex = this.state.index;
-        await axios.post('/api/values', {
-            index: this.state.index
-        });
 
-        this.setState({index: ''});
-
-        // TBD: This should be done using react state
-        const newIndices = <h4>Calculating {calcIndex}...Refresh page to see results</h4>;
-        ReactDOM.render(newIndices, document.getElementById('fibcalc-indices'));
+        // This getting cached results.
+        const result = await axios.get('/api/values/' + calcIndex);
+        
+        // If it's not calc'd already, got send it to the server to calc
+        if (!result.data) {
+            await axios.post('/api/values', {
+                index: this.state.index
+            });
+    
+            this.setState({index: ''});
+    
+            // TBD: This should be done using react state
+            const newIndices = <h4>Calculating {calcIndex}...Refresh page to see results</h4>;
+            ReactDOM.render(newIndices, document.getElementById('fibcalc-indices'));
+        }
+        
+        
     };
 
     renderSeenIndices() {

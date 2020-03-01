@@ -14,7 +14,7 @@ const redisPublisher = redisClient.duplicate();
 
 
 function ValueRequestHandler() {
-        // Create database
+    // Create database
     this.pgClient = new Pool({
             user: keys.pgUser,
             host: keys.pgHost,
@@ -54,10 +54,25 @@ console.log(err));
         });
     }
 
+    this.getCachedValue = async (number) => {
+        console.log("getting current value")
+        return new Promise((resolve, reject) => {
+            this.redisClient.hget('values', number, (err, value) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(value);
+                }
+            });
+        });
+    }
+
     this.postValue = async (value) => {
 
         let hget = util.promisify(this.redisClient.hget).bind(this.redisClient);
         let result = await hget('values', value);
+
+        let pgresult = await this.pgClient.query('SELECT result from values WHERE number = ' + value);
 
         if (result === null) {
             // queue for the worker, right now this is redis, but changing to be the db
