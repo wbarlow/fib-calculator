@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM  from 'react-dom';
 import axios from 'axios';
 
 class Fib extends Component {
@@ -64,20 +63,21 @@ class Fib extends Component {
     
             this.setState({index: ''});
     
-            // TBD: This should be done using react state
-            const newIndices = <h4>Calculating {calcIndex}...Refresh page to see results</h4>;
-            ReactDOM.render(newIndices, document.getElementById('fibcalc-indices'));
+            // TBD: This should also set a refresh timer.
+            this.setState({calculatingIndex: calcIndex});
         }
         
         
     };
 
     renderSeenIndices() {
-        return (
-            <div id="fibcalc-indices">
+        if (this.state.calculatingIndex) {
+            return <h4>Calculating {this.state.calculatingIndex}...Refresh page to see results</h4>
+        } else {
+            return <div id="fibcalc-indices">
                 <h4>{this.state.seenIndices.map(({ number }) => number).join(', ')}</h4>
             </div>
-        );
+        }
     }
 
     renderValues() {
